@@ -10,6 +10,12 @@ class User(AbstractUser):
         ('admin', 'Администратор'),
     )
 
+    email = models.EmailField(
+        ('email address'),
+        max_length=254,
+        blank=False,
+        unique=True
+    )
     first_name = models.CharField('first name', max_length=150, blank=True)
     bio = models.TextField(
         'Биография',
@@ -25,7 +31,4 @@ class User(AbstractUser):
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'], name='unique_user_email')
-        ]
+        verbose_name_plural = "Пользователи"
