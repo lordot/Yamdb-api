@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Comment, Genre, Review, Title
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -35,6 +35,31 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('pk', 'review', 'author', 'text', 'pub_date')
     search_fields = ('text',)
     empty_value_display = '-пусто-'
+    
+@admin.register(User)
+class CustomAdmin(UserAdmin):
+
+    model = User
+    add_fieldsets = (
+        *UserAdmin.add_fieldsets,
+        (None, {'fields': ('email',)}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'bio',)}),
+        ('Permissions', {'fields': ('role',)})
+    )
+
+    fieldsets = (
+        *UserAdmin.fieldsets,
+        ('Permissions', {'fields': ('role',)})
+    )
+
+    list_display = [
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'bio',
+        'role',
+    ]
 
 
 admin.site.register(Category, CategoryAdmin)
