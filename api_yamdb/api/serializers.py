@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Review
+from reviews.models import Review, Comment
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -8,7 +8,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        exclude = ('title', )
         read_only_fields = ('author', 'pub_date')
         validators = [
             serializers.UniqueTogetherValidator(
@@ -17,3 +17,12 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message="Only one review per title"
             )
         ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username', required=False)
+
+    class Meta:
+        model = Comment
+        exclude = ('review',)
+        read_only_fields = ('author', 'pub_date')
