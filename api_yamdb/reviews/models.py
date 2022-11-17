@@ -1,5 +1,7 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 
 
 class User(AbstractUser):
@@ -32,3 +34,18 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name_plural = "Пользователи"
+
+
+class Review(models.Model):
+    # заглушка user
+    author = models.IntegerField()
+    # заглушка title
+    title = models.IntegerField()
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
+    )
+    score = models.IntegerField(
+        blank=False,
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
