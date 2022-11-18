@@ -1,15 +1,27 @@
-
-
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Review, User
-from serializers import ReviewSerializer, UserSerializer
+from serializers import ReviewSerializer, UserSerializer, CommentSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        # добавить определение ID произведения
+        pass
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        # добавить передачу ID title и review
+        pass
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

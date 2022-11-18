@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-
 class User(AbstractUser):
 
     ROLES = (
@@ -37,8 +36,11 @@ class User(AbstractUser):
 
 
 class Review(models.Model):
-    # заглушка user
-    author = models.IntegerField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     # заглушка title
     title = models.IntegerField()
     text = models.TextField()
@@ -48,4 +50,21 @@ class Review(models.Model):
     score = models.IntegerField(
         blank=False,
         validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
     )
