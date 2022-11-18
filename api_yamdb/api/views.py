@@ -1,6 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import filters, permissions, viewsets
+from rest_framework.pagination import LimitOffsetPagination
 
-from serializers import ReviewSerializer, CommentSerializer
+from reviews.models import Review, User
+from serializers import ReviewSerializer, UserSerializer, CommentSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -23,3 +25,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+    lookup_url_kwarg = 'username'
+    pagination_class = LimitOffsetPagination
+    # permission_classes = [permissions.IsAdminUser, ]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
