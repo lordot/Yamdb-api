@@ -1,14 +1,17 @@
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, viewsets, mixins
+from rest_framework import  filters, permissions, status, viewsets, mixins
+from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 from .mixins import ListCreateDestroyViewSet
-
 
 from reviews.models import Review, User, Category, Genre, Title
 from .serializers import (
     ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
-    TitleSerializer, GenreSerializer, AuthSerializer
+    TitleSerializer, GenreSerializer, AuthSerializer, TokenSerializer
 )
 
 
@@ -68,6 +71,7 @@ class CommentViewSet(ReviewViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Модель юзеров"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
@@ -80,7 +84,28 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class SignupViewSet(mixins.CreateModelMixin,
                     viewsets.GenericViewSet):
-
+    """Регистрация нового юзера"""
     queryset = User.objects.all()
     serializer_class = AuthSerializer
     permission_classes = [permissions.AllowAny, ]
+
+
+class TokenJWTView(APIView):
+
+    """Выдача токена"""
+    permission_classes = [permissions.AllowAny, ]
+
+    def post(self, request):
+        serializer = TokenSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = get_object_or_404(
+                User, username=serializer.data['username'])
+            # проверяем confirmation code, если верный, выдаем токен
+            if default_token_generator.check_token(
+               user, serializer.data['confirmation_code']):
+                token = AccessToken.for_user(user)
+                return Response(
+                    {'token': str(token)}, status=status.HTTP_200_OK)
+            return Response({
+                'confirmation code': 'Некорректный код подтверждения!'},
+                status=status.HTTP_400_BAD_REQUEST)
