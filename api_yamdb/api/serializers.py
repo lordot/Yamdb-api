@@ -45,7 +45,6 @@ class UserSerializer(serializers.ModelSerializer):
         lookup_field = 'username'
 
 
-
 class AuthSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -92,4 +91,3 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         exclude = ('review',)
         read_only_fields = ('author', 'pub_date')
-
