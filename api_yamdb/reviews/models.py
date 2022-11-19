@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -108,3 +109,38 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name_plural = "Пользователи"
+
+
+class Review(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    # заглушка title
+    title = models.IntegerField()
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
+    )
+    score = models.IntegerField(
+        blank=False,
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True
+    )
