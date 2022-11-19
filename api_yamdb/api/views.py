@@ -5,7 +5,10 @@ from rest_framework.pagination import LimitOffsetPagination
 from .mixins import ListCreateDestroyViewSet
 
 from reviews.models import Review, User, Category, Genre, Title
-from serializers import ReviewSerializer, UserSerializer, CommentSerializer
+from .serializers import (
+    ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
+    TitleSerializer, GenreSerializer
+)
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -35,6 +38,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         self.perform_create(serializer)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

@@ -26,6 +26,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:

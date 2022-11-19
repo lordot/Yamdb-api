@@ -117,8 +117,11 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    # заглушка title
-    title = models.IntegerField()
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     text = models.TextField()
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True
