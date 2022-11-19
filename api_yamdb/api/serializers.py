@@ -45,17 +45,18 @@ class UserSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', required=False)
 
+    def validate(self, data):
+        author = self.context.get('request').user
+        context = self.context.get('view').kwargs
+        title = context['title_id']
+        if Review.objects.filter(author=author, title=title).exists():
+            raise serializers.ValidationError("Only one review per title")
+        return data
+
     class Meta:
         model = Review
         exclude = ('title', )
-        read_only_fields = ('author', 'pub_date')
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title'),
-                message="Only one review per title"
-            )
-        ]
+        read_only_fields = ('author', 'pub_date', 'title')
 
 
 class CommentSerializer(serializers.ModelSerializer):
