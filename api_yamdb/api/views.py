@@ -1,12 +1,71 @@
 from django.forms import ValidationError
-from rest_framework import filters, mixins, permissions, viewsets
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, viewsets, mixins, status
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
+from .mixins import ListCreateDestroyViewSet
 
-from reviews.models import User
-from .serializers import AuthSerializer, UserSerializer
+
+from reviews.models import Review, User, Category, Genre, Title, Comment
+from .serializers import (
+    ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
+    TitleSerializer, GenreSerializer, AuthSerializer, UserSerializer
+)
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = [DjangoFilterBackend]
+
+    def perform_create(self, serializer):
+        category = get_object_or_404(
+            Category, slug=self.request.data.get('category')
+        )
+        genre = Genre.objects.filter(
+            slug__in=self.request.data.getlist('genre')
+        )
+        serializer.save(category=category, genre=genre)
+
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_title(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        return title
+
+    def get_queryset(self):
+        return self.get_title().reviews.select_related('author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
+
+
+class CommentViewSet(ReviewViewSet):
+    serializer_class = CommentSerializer
+
+    def get_review(self):
+        title = self.get_title().reviews.select_related('author')
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=title)
+        return review
+
+    def get_queryset(self):
+        return self.get_review().comments.select_related('author')
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -19,22 +78,6 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    # @action(detail=True, methods=['get', 'patch']) #permission_classes=[IsAuthenticated])
-    # def me(self, request, pk=None):
-
-    #     if request.method == 'POST':
-    #         serializer = UserSerializer(data=request.data)
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #             return Response(serializer.data,
-    #                             status=status.HTTP_201_CREATED)
-    #         return Response(serializer.errors,
-    #                         status=status.HTTP_400_BAD_REQUEST)
-    #     profile_username = User.objects.filter(
-    #         username=self.request.user.username)
-    #     serializer = UserSerializer(profile_username)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class SignupViewSet(mixins.CreateModelMixin,
                     viewsets.GenericViewSet):
@@ -44,21 +87,3 @@ class SignupViewSet(mixins.CreateModelMixin,
     permission_classes = [permissions.AllowAny, ]
     
 
-
-        
-        
-    # @action(detail=False,  methods=['post']
-    # def token(self, request):
-        # user_id = request.query_params.get('user_id', '')
-        # confirmation_token = request.query_params.get('confirmation_token', '')
-        # try:
-        #     user = self.get_queryset().get(pk=user_id)
-        # except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-   #     user = None
-        # if user is None:
-        #     return Response('User not found', status=status.HTTP_400_BAD_REQUEST)
-         # if not default_token_generator.check_token(user, confirmation_token):
-       #     return Response('Token is invalid or expired. Please request another confirmation email by signing in.', status=status.HTTP_400_BAD_REQUEST)
-        # user.is_active = True
-        # user.save()
-            # return Response('Email successfully confirmed')
