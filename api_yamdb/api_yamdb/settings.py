@@ -1,4 +1,7 @@
+from datetime import timedelta
 import os
+
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,6 +11,24 @@ SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+
+# EMAIL_HOST = 'smtp.email-domain.com'
+# EMAIL_HOST_USER = 
+# EMAIL_HOST_PASSWORD = 
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# ADMINS = (
+#     ('You', 'you@email.com'),
+# )
+# MANAGERS = ADMINS
 
 ALLOWED_HOSTS = ['*']
 
@@ -110,3 +131,16 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 # User
 AUTH_USER_MODEL = 'reviews.User'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+}

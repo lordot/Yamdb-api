@@ -1,13 +1,15 @@
+from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, viewsets, mixins, status
 from rest_framework.pagination import LimitOffsetPagination
 from .mixins import ListCreateDestroyViewSet
+
 
 from reviews.models import Review, User, Category, Genre, Title, Comment
 from .serializers import (
     ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
-    TitleSerializer, GenreSerializer
+    TitleSerializer, GenreSerializer, AuthSerializer, UserSerializer
 )
 
 
@@ -72,6 +74,16 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     lookup_url_kwarg = 'username'
     pagination_class = LimitOffsetPagination
-    # permission_classes = [permissions.IsAdminUser, ]
+    permission_classes = [permissions.IsAdminUser, ]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+
+
+class SignupViewSet(mixins.CreateModelMixin,
+                    viewsets.GenericViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = AuthSerializer
+    permission_classes = [permissions.AllowAny, ]
+    
+
