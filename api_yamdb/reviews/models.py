@@ -29,6 +29,12 @@ class User(AbstractUser):
         choices=ROLES,
         default='user'
     )
+    is_moderator = models.BooleanField(
+        'moderator',
+        default=False,
+        help_text='Designates whether'
+                  'this user should be treated as moderator.'
+    )
 
     class Meta:
         verbose_name_plural = "Пользователи"
