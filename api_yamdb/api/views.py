@@ -1,7 +1,8 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import  filters, permissions, status, viewsets, mixins
+from rest_framework import filters, permissions, status, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -11,7 +12,8 @@ from .mixins import ListCreateDestroyViewSet
 from reviews.models import Review, User, Category, Genre, Title
 from .serializers import (
     ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
-    TitleSerializer, GenreSerializer, AuthSerializer, TokenSerializer
+    TitleSerializer, GenreSerializer, AuthSerializer, TokenSerializer,
+    SimpleUserSerializer
 )
 
 
@@ -77,9 +79,41 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     lookup_url_kwarg = 'username'
     pagination_class = LimitOffsetPagination
-    permission_classes = [permissions.IsAdminUser, ]
+    # permission_classes = [permissions.IsAdminUser, ]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+
+
+class MeView(APIView):
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request, format=None):
+        """
+        возвращает данные юзера.
+        """
+        profile_user = request.user
+        serializer = UserSerializer(profile_user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        """
+        редактирует данные юзера.
+        """
+        profile_user = request.user
+        if request.user.is_superuser or request.user.is_admin:  #вот тут условие не совсем правильное
+            serializer = UserSerializer(profile_user,           # суперюзер и админ вроде полностью могут редактировать, а просто юзер чето не понятно
+                                        data=request.data, partial=True)
+        else:
+            serializer = SimpleUserSerializer(
+                request.user, data=request.data, partial=True
+            )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)              
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUES)
 
 
 class SignupViewSet(mixins.CreateModelMixin,
