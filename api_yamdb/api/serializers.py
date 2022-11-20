@@ -1,8 +1,12 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from rest_framework import serializers
+from rest_framework import exceptions, serializers
 
 from reviews.models import Review, User, Comment, Category, Genre, Title
+
+RESERVED_NAME = 'me'
+MESSAGE_FOR_RESERVED_NAME = 'Имя пользователя "me" использовать нельзя!'
+MESSAGE_FOR_USER_NOT_FOUND = 'Пользователя с таким именем нет!'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,7 +34,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    """Изменение полей модели юзера."""
     class Meta:
         fields = (
             'username',
@@ -46,13 +50,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.ModelSerializer):
-
+    """Регистрация нового юзера.
+    Полечение кода подьверждения."""
     class Meta:
         fields = (
             'username',
             'email'
         )
         model = User
+
+    def validate_username(self, value):
+        username = value.lower()
+        if username == "me":
+            raise serializers.ValidationError("Имя me недоступно")
+        return value
 
     def create(self, validated_data):
         user = User.objects.create(**validated_data)
@@ -66,7 +77,21 @@ class AuthSerializer(serializers.ModelSerializer):
         )
         return user
 
-      
+
+class TokenSerializer(serializers.Serializer):
+    """Получение токена.
+    Зарезервированное имя "me" использовать нельзя."""
+    username = serializers.CharField(max_length=150, required=True)
+    confirmation_code = serializers.CharField(max_length=200, required=True)
+
+    def validate_username(self, value):
+        if value == RESERVED_NAME:
+            raise serializers.ValidationError(MESSAGE_FOR_RESERVED_NAME)
+        if not User.objects.filter(username=value).exists():
+            raise exceptions.NotFound(MESSAGE_FOR_USER_NOT_FOUND)
+        return value
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', required=False)
 

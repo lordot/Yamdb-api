@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 
 from .views import (CategoryViewSet, GenreViewSet,
                     TitleViewSet, UserViewSet, ReviewViewSet, CommentViewSet,
-                    SignupViewSet)
+                    SignupViewSet, TokenJWTView)
 
 app_name = 'api'
 
@@ -18,7 +18,7 @@ router.register('titles', TitleViewSet, basename='titles')
 router.register(r'users', UserViewSet)
 router.register(r'users/<slug:username>', UserViewSet)
 router.register(r'auth/signup', SignupViewSet, basename='auth')
-router.register(r'auth/token', SignupViewSet, basename='auth')
+
 router.register(
     'titles/(?P<title_id>\\d+)/reviews',
     ReviewViewSet,
@@ -40,6 +40,9 @@ jwt_urls = [
         'jwt/refresh/',
         TokenRefreshView.as_view(),
         name='token_refresh'
+    ),
+    path(
+        'auth/token/', TokenJWTView.as_view(),
     ),
 ]
 
