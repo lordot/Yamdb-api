@@ -1,7 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import  filters, permissions, status, viewsets, mixins
+from rest_framework import filters, permissions, status, viewsets, mixins
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -31,25 +31,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend]
 
-    def perform_create(self, serializer):
-        category = get_object_or_404(
-            Category, slug=self.request.data.get('category')
-        )
-        genre = Genre.objects.filter(
-            slug__in=self.request.data.getlist('genre')
-        )
-        serializer.save(category=category, genre=genre)
-
-    def perform_update(self, serializer):
-        self.perform_create(serializer)
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_title(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return title
+        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
     def get_queryset(self):
         return self.get_title().reviews.select_related('author')
@@ -62,12 +49,15 @@ class CommentViewSet(ReviewViewSet):
     serializer_class = CommentSerializer
 
     def get_review(self):
-        title = self.get_title().reviews.select_related('author')
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=title)
-        return review
+        return get_object_or_404(
+            Review, title=self.get_title(), pk=self.kwargs.get("review_id")
+        )
 
     def get_queryset(self):
         return self.get_review().comments.select_related('author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 class UserViewSet(viewsets.ModelViewSet):

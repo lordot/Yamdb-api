@@ -48,20 +48,20 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         verbose_name='Год',
-        null=True,
-        blank=True
+        null=False,
+        blank=False,
     )
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
         related_name='titles'
     )
     genre = models.ManyToManyField(
         Genre,
-        blank=True,
+        blank=False,
         verbose_name='Жанр',
         related_name='titles'
     )
