@@ -1,15 +1,11 @@
+from api_yamdb.settings import RESERVED_NAME, MESSAGE_FOR_RESERVED_NAME, MESSAGE_FOR_USER_NOT_FOUND
 import datetime as dt
-
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from rest_framework import exceptions, serializers
 
 from reviews.models import Review, User, Comment, Category, Genre, Title
-
-RESERVED_NAME = 'me'
-MESSAGE_FOR_RESERVED_NAME = 'Имя пользователя "me" использовать нельзя!'
-MESSAGE_FOR_USER_NOT_FOUND = 'Пользователя с таким именем нет!'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -55,27 +51,37 @@ class TitleSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Изменение полей модели юзера."""
     class Meta:
-        fields = (
+        fields = [
             'username',
             'email',
             'first_name',
             'last_name',
             'bio',
             'role',
-            'is_moderator',
-        )
+        ]
         model = User
         lookup_field = 'username'
+
+
+class SimpleUserSerializer(serializers.ModelSerializer):
+    """Поля для редактирования простым пользователем."""
+    class Meta:
+        fields = [
+            'first_name',
+            'last_name',
+            'bio'
+        ]
+        model = User
 
 
 class AuthSerializer(serializers.ModelSerializer):
     """Регистрация нового юзера.
     Полечение кода подьверждения."""
     class Meta:
-        fields = (
+        fields = [
             'username',
             'email'
-        )
+        ]
         model = User
 
     def validate_username(self, value):

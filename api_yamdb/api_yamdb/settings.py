@@ -2,6 +2,9 @@ from datetime import timedelta
 import os
 
 
+RESERVED_NAME = 'me'
+MESSAGE_FOR_RESERVED_NAME = 'Имя пользователя "me" использовать нельзя!'
+MESSAGE_FOR_USER_NOT_FOUND = 'Пользователя с таким именем нет!'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
