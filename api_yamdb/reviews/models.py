@@ -137,6 +137,11 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
 
 class Comment(models.Model):
     review = models.ForeignKey(
@@ -153,3 +158,8 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True
     )
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

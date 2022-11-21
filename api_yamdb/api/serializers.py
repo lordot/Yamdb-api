@@ -39,7 +39,7 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField(read_only=True)
 
     def get_rating(self, obj):
-        return int(obj.reviews.all().aggregate(Avg('score'))['score__avg'])
+        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
 
     def validate_year(self, value):
         now = dt.date.today().year
