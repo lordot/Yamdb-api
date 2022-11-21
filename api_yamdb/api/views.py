@@ -20,38 +20,28 @@ from .serializers import (
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filterset_fields = ['category', 'genre', 'name', 'year']
+    search_fields = ('name',)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = [DjangoFilterBackend]
-
-    def perform_create(self, serializer):
-        category = get_object_or_404(
-            Category, slug=self.request.data.get('category')
-        )
-        genre = Genre.objects.filter(
-            slug__in=self.request.data.getlist('genre')
-        )
-        serializer.save(category=category, genre=genre)
-
-    def perform_update(self, serializer):
-        self.perform_create(serializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_title(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return title
+        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
     def get_queryset(self):
         return self.get_title().reviews.select_related('author')
@@ -64,12 +54,15 @@ class CommentViewSet(ReviewViewSet):
     serializer_class = CommentSerializer
 
     def get_review(self):
-        title = self.get_title().reviews.select_related('author')
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=title)
-        return review
+        return get_object_or_404(
+            Review, title=self.get_title(), pk=self.kwargs.get("review_id")
+        )
 
     def get_queryset(self):
         return self.get_review().comments.select_related('author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 class UserViewSet(viewsets.ModelViewSet):

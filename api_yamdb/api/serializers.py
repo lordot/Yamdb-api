@@ -1,6 +1,8 @@
 from api_yamdb.settings import RESERVED_NAME, MESSAGE_FOR_RESERVED_NAME, MESSAGE_FOR_USER_NOT_FOUND
+import datetime as dt
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from rest_framework import exceptions, serializers
 
 from reviews.models import Review, User, Comment, Category, Genre, Title
@@ -21,12 +23,28 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.FloatField(read_only=True)
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    rating = serializers.SerializerMethodField(read_only=True)
+
+    def get_rating(self, obj):
+        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
+
+    def validate_year(self, value):
+        now = dt.date.today().year
+        if value > now:
+            raise serializers.ValidationError("Wrong year")
+        return value
 
     class Meta:
-        fields = '__all__'
+        fields = 'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         model = Title
 
 
@@ -107,7 +125,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         context = self.context.get('view').kwargs
         title = context['title_id']
         if Review.objects.filter(author=author, title=title).exists():
-            raise serializers.ValidationError("Only one review per title")
+            raise serializers.ValidationError("Only one review per title fon author")
         return data
 
     class Meta:

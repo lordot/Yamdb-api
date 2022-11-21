@@ -48,20 +48,20 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         verbose_name='Год',
-        null=True,
-        blank=True
+        null=False,
+        blank=False,
     )
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
         related_name='titles'
     )
     genre = models.ManyToManyField(
         Genre,
-        blank=True,
+        blank=False,
         verbose_name='Жанр',
         related_name='titles'
     )
@@ -157,6 +157,11 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
 
 class Comment(models.Model):
     review = models.ForeignKey(
@@ -173,3 +178,8 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True
     )
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
