@@ -18,18 +18,21 @@ from .serializers import (
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filterset_fields = ['category', 'genre', 'name', 'year']
+    search_fields = ('name',)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = [DjangoFilterBackend]
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
