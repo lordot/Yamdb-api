@@ -106,29 +106,6 @@ class User(AbstractUser):
         choices=ROLES,
         default='user'
     )
-    is_active = models.BooleanField(
-        'active',
-        default=True,
-        help_text='Designates whether this user should be treated as active. '
-                  'Unselect this instead of deleting accounts.'
-    )
-    is_superuser = models.BooleanField(
-        'superuser status',
-        default=False,
-        help_text='Designates that this user has all permissions without '
-                   'explicitly assigning them.'
-    )
-    is_admin = models.BooleanField(
-        'staff status', # вместо стафф статус надо написать- администратор
-        default=False,
-        help_text='Designates whether the user can log into this admin site.'
-    )
-    is_moderator = models.BooleanField(
-        'moderator',
-        default=False,
-        help_text='Designates whether'
-                  'this user should be treated as moderator.'
-    )
 
     class Meta:
         verbose_name_plural = "Пользователи"
@@ -136,6 +113,17 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
+
+    @property
+    def is_user(self):
+        return self.role == 'user'
 
 class Review(models.Model):
     author = models.ForeignKey(
