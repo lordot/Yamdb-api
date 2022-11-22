@@ -8,6 +8,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from .mixins import ListCreateDestroyViewSet
+from .permissions import IsAdminOrReadOnly, SpecialForStuffAndAuthor
 
 from reviews.models import Review, User, Category, Genre, Title
 from .serializers import (
@@ -20,25 +21,31 @@ from .serializers import (
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    filterset_fields = ['category', 'genre', 'name', 'year']
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = (filters.SearchFilter)
     search_fields = ('name',)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = [IsAdminOrReadOnly, ]
+    # filter_backends = (DjangoFilterBackend)
+    # filterset_fields = ['category', 'genre', 'name', 'year']
+   
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = [SpecialForStuffAndAuthor, ]
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -52,6 +59,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(ReviewViewSet):
     serializer_class = CommentSerializer
+    permission_classes = [SpecialForStuffAndAuthor, ]
 
     def get_review(self):
         return get_object_or_404(
@@ -72,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     lookup_url_kwarg = 'username'
     pagination_class = LimitOffsetPagination
-    # permission_classes = [permissions.IsAdminUser, ]
+    permission_classes = [permissions.IsAdminUser, ]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
@@ -93,20 +101,17 @@ class MeView(APIView):
         редактирует данные юзера.
         """
         profile_user = request.user
-        if request.user.is_superuser or request.user.is_admin:  #вот тут условие не совсем правильное
-            serializer = UserSerializer(profile_user,           # суперюзер и админ вроде полностью могут редактировать, а просто юзер чето не понятно
+        if request.user.is_superuser or request.user.is_admin:
+            serializer = UserSerializer(profile_user,
                                         data=request.data, partial=True)
         else:
             serializer = SimpleUserSerializer(
                 request.user, data=request.data, partial=True
             )
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)              
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUES)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SignupViewSet(mixins.CreateModelMixin,

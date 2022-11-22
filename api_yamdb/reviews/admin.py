@@ -48,13 +48,11 @@ class CustomAdmin(UserAdmin):
         (None, {'fields': ('email',)}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'bio',)}),
         ('Role', {'fields': ('role',)}),
-        ('Permissions', {'fields': ('is_active', 'is_moderator',
-                                    'is_admin', 'is_superuser')})
     )
 
     fieldsets = (
         *UserAdmin.fieldsets,
-        ('Role', {'fields': ('role', 'is_moderator')}),
+        ('Role', {'fields': ('role',)}),
     )
 
     list_display = [

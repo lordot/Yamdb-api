@@ -67,10 +67,14 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     """Поля для редактирования простым пользователем."""
     class Meta:
         fields = [
+            'username',
+            'email',
             'first_name',
             'last_name',
-            'bio'
+            'bio',
+
         ]
+        read_only_fields = ('username', 'email')
         model = User
 
 
