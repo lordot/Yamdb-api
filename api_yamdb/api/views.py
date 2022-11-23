@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -6,8 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.decorators import action
 from .mixins import ListCreateDestroyViewSet
-from .permissions import IsAdminOrReadOnly, SpecialForStuffAndAuthor
+from .permissions import IsAdmin, IsAdminOrReadOnly, SpecialForStuffAndAuthor
 
 from reviews.models import Review, User, Category, Genre, Title
 from .serializers import (
@@ -78,46 +80,83 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     lookup_url_kwarg = 'username'
     pagination_class = LimitOffsetPagination
-    permission_classes = [permissions.IsAdminUser, ]
+    permission_classes = [IsAdmin, ]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-
-class MeView(APIView):
-    permission_classes = [permissions.IsAuthenticated, ]
-
-    def get(self, request, format=None):
-        """
-        возвращает данные юзера.
-        """
-        profile_user = request.user
-        serializer = UserSerializer(profile_user)
-        return Response(serializer.data)
-
-    def patch(self, request):
-        """
-        редактирует данные юзера.
-        """
-        profile_user = request.user
-        if request.user.is_superuser or request.user.is_admin:
-            serializer = UserSerializer(profile_user,
-                                        data=request.data, partial=True)
-        else:
-            serializer = SimpleUserSerializer(
-                request.user, data=request.data, partial=True
-            )
-
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def user_info(self, request):
+        user = get_object_or_404(
+            User,
+            username=request.user.username
+        )
+        if request.method != 'PATCH':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(
+            user,
+            data=request.data,
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if self.request.user.role == 'admin' or self.request.user.is_superuser:
+            serializer.save()
+        else:
+            serializer.save(role=user.role)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK)
 
 
 class SignupViewSet(mixins.CreateModelMixin,
                     viewsets.GenericViewSet):
     """Регистрация нового юзера"""
+
     queryset = User.objects.all()
-    serializer_class = AuthSerializer
     permission_classes = [permissions.AllowAny, ]
+
+    def create(self, request):
+        serializer = AuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        try:
+            user = User.objects.get(
+                username=username,
+                email=email
+            )
+        except User.DoesNotExist:
+            if User.objects.filter(username=username).exists():
+                return Response(
+                    'Пользователь с таким "username" уже зарегистрирован',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    'Пользователь с таким "email" уже зарегистрирован',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user = User.objects.create_user(username=username, email=email)
+        if serializer.is_valid(raise_exception=True):
+            user.save()
+            confirmation_code = default_token_generator.make_token(user)
+            send_mail(
+                subject='Ваш код подтверждения для получения токена',
+                message=f'confirmation_code:{confirmation_code}',
+                from_email='Mainsuperuser27@gmail.com',
+                recipient_list=[serializer.validated_data.get('email')],
+                fail_silently=False,
+            )
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenJWTView(APIView):
