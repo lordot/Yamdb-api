@@ -80,7 +80,6 @@ class Title(models.Model):
 
 
 class User(AbstractUser):
-
     ROLES = (
         ('user', 'Аутентифицированный пользователь'),
         ('moderator', 'Модератор'),
@@ -125,6 +124,7 @@ class User(AbstractUser):
     def is_user(self):
         return self.role == 'user'
 
+
 class Review(models.Model):
     author = models.ForeignKey(
         User,
@@ -149,6 +149,7 @@ class Review(models.Model):
         ordering = ['id']
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        unique_together = ('author', 'title',)
 
 
 class Comment(models.Model):

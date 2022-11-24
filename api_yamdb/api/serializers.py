@@ -6,7 +6,6 @@ from rest_framework import exceptions, serializers
 from rest_framework.validators import UniqueValidator
 
 
-
 from reviews.models import Review, User, Comment, Category, Genre, Title
 
 
@@ -25,29 +24,34 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+    rating = serializers.SerializerMethodField(read_only=True)
+
+    def get_rating(self, obj):
+        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
+
+    class Meta:
+        fields = 'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        model = Title
+
+
+class CreateTitleSerializer(TitleSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
-        queryset=Genre.objects.all()
+        queryset=Genre.objects.all(),
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
     )
-    rating = serializers.SerializerMethodField(read_only=True)
-
-    def get_rating(self, obj):
-        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
 
     def validate_year(self, value):
         now = dt.date.today().year
         if value > now:
             raise serializers.ValidationError("Wrong year")
         return value
-
-    class Meta:
-        fields = 'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
-        model = Title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -123,13 +127,13 @@ class TokenSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username', required=False)
 
-    def validate(self, data):
+    def create(self, validated_data):
         author = self.context.get('request').user
         context = self.context.get('view').kwargs
         title = context['title_id']
         if Review.objects.filter(author=author, title=title).exists():
-            raise serializers.ValidationError("Only one review per title fon author")
-        return data
+            raise serializers.ValidationError("Only one review per title for author")
+        return Review.objects.create(**validated_data)
 
     class Meta:
         model = Review
