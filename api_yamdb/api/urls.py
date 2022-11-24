@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 
 from .views import (CategoryViewSet, GenreViewSet,
                     TitleViewSet, UserViewSet, ReviewViewSet, CommentViewSet,
-                    SignupViewSet, TokenJWTView, MeView)
+                    SignupViewSet, TokenJWTView) #MeView)
 
 app_name = 'api'
 
@@ -15,7 +15,7 @@ router = DefaultRouter()
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
 router.register('titles', TitleViewSet, basename='titles')
-router.register(r'users', UserViewSet)
+router.register(r'users', UserViewSet, basename='users')
 router.register(r'users/<slug:username>', UserViewSet)
 
 router.register(r'auth/signup', SignupViewSet, basename='auth')
@@ -48,7 +48,6 @@ jwt_urls = [
 ]
 
 urlpatterns = [
-    path('v1/users/me/', MeView.as_view()),
     path('v1/', include(router.urls)),
     path('v1/', include(jwt_urls)),
 ]

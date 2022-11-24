@@ -1,9 +1,11 @@
-from api_yamdb.settings import RESERVED_NAME, MESSAGE_FOR_RESERVED_NAME, MESSAGE_FOR_USER_NOT_FOUND
+from api_yamdb.settings import RESERVED_NAME, MESSAGE_FOR_RESERVED_NAME
+from api_yamdb.settings import MESSAGE_FOR_USER_NOT_FOUND
 import datetime as dt
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.db.models import Avg
 from rest_framework import exceptions, serializers
+from rest_framework.validators import UniqueValidator
+
+
 
 from reviews.models import Review, User, Comment, Category, Genre, Title
 
@@ -81,6 +83,15 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class AuthSerializer(serializers.ModelSerializer):
     """Регистрация нового юзера.
     Полечение кода подьверждения."""
+    username = serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    
     class Meta:
         fields = [
             'username',
@@ -93,18 +104,6 @@ class AuthSerializer(serializers.ModelSerializer):
         if username == "me":
             raise serializers.ValidationError("Имя me недоступно")
         return value
-
-    def create(self, validated_data):
-        user = User.objects.create(**validated_data)
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Ваш код подтверждения для получения токена',
-            message=f'confirmation_code:{confirmation_code}',
-            from_email='Mainsuperuser27@gmail.com',
-            recipient_list=[f'{user.email}'],
-            fail_silently=False,
-        )
-        return user
 
 
 class TokenSerializer(serializers.Serializer):
