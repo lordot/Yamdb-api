@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 
 from .views import (CategoryViewSet, GenreViewSet,
                     TitleViewSet, UserViewSet, ReviewViewSet, CommentViewSet,
-                    SignupViewSet, TokenJWTView) #MeView)
+                    SignupViewSet, TokenJWTView)
 
 app_name = 'api'
 

@@ -1,12 +1,14 @@
-from api_yamdb.settings import RESERVED_NAME, MESSAGE_FOR_RESERVED_NAME
-from api_yamdb.settings import MESSAGE_FOR_USER_NOT_FOUND
+from django.conf import settings
 import datetime as dt
 from django.db.models import Avg
 from rest_framework import exceptions, serializers
 from rest_framework.validators import UniqueValidator
 
 
-from reviews.models import Review, User, Comment, Category, Genre, Title
+from reviews.models import (
+    Review, User, Comment,
+    Category, Genre, Title
+)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -117,10 +119,10 @@ class TokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(max_length=200, required=True)
 
     def validate_username(self, value):
-        if value == RESERVED_NAME:
-            raise serializers.ValidationError(MESSAGE_FOR_RESERVED_NAME)
+        if value == settings.RESERVED_NAME:
+            raise serializers.ValidationError(settings.MESSAGE_FOR_RESERVED_NAME)
         if not User.objects.filter(username=value).exists():
-            raise exceptions.NotFound(MESSAGE_FOR_USER_NOT_FOUND)
+            raise exceptions.NotFound(settings.MESSAGE_FOR_USER_NOT_FOUND)
         return value
 
 

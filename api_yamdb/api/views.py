@@ -17,7 +17,7 @@ from reviews.models import Review, User, Category, Genre, Title
 from .serializers import (
     ReviewSerializer, UserSerializer, CommentSerializer, CategorySerializer,
     TitleSerializer, GenreSerializer, AuthSerializer, TokenSerializer,
-    SimpleUserSerializer, CreateTitleSerializer
+    CreateTitleSerializer
 )
 
 
@@ -126,7 +126,7 @@ class SignupViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny, ]
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = AuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')

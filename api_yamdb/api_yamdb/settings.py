@@ -21,18 +21,6 @@ if DEBUG:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-
-
-# EMAIL_HOST = 'smtp.email-domain.com'
-# EMAIL_HOST_USER = 
-# EMAIL_HOST_PASSWORD = 
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# ADMINS = (
-#     ('You', 'you@email.com'),
-# )
-# MANAGERS = ADMINS
-
 ALLOWED_HOSTS = ['*']
 
 
