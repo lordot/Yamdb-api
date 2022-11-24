@@ -22,14 +22,25 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class SpecialForStuffAndAuthor(permissions.BasePermission):
     """ разрешение на редактирование и удаление отзыва"""
+    def has_permission(self, request, view):
+        return bool(
+            request.method in permissions.SAFE_METHODS
+            or request.user and request.user.is_authenticated
+        )
+
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
+        if request.method == 'GET':
             return True
         if request.method == 'POST':
             return bool(request.user.is_authenticated)
         if request.method == 'PATCH' or request.method == 'DELETE':
-            return bool(request.user.is_moderator
-                        or request.user.is_admin
-                        or obj.author == request.user)
+            return bool(
+                obj.author == request.user
+                or (request.user.is_authenticated
+                    and request.user.is_moderator)
+                or (request.user.is_authenticated
+                    and request.user.is_admin)
+            )
         else:
             return False
+        
