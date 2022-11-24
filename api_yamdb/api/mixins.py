@@ -10,4 +10,3 @@ class ListCreateDestroyViewSet(
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
-

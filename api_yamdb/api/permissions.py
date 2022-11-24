@@ -43,4 +43,3 @@ class SpecialForStuffAndAuthor(permissions.BasePermission):
             )
         else:
             return False
-        

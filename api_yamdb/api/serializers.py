@@ -34,7 +34,10 @@ class TitleSerializer(serializers.ModelSerializer):
         return obj.reviews.all().aggregate(Avg('score'))['score__avg']
 
     class Meta:
-        fields = 'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        fields = (
+            'id', 'name', 'year', 'rating',
+            'description', 'genre', 'category'
+        )
         model = Title
 
 
@@ -97,7 +100,7 @@ class AuthSerializer(serializers.ModelSerializer):
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
-    
+
     class Meta:
         fields = [
             'username',
@@ -120,7 +123,9 @@ class TokenSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         if value == settings.RESERVED_NAME:
-            raise serializers.ValidationError(settings.MESSAGE_FOR_RESERVED_NAME)
+            raise serializers.ValidationError(
+                settings.MESSAGE_FOR_RESERVED_NAME
+            )
         if not User.objects.filter(username=value).exists():
             raise exceptions.NotFound(settings.MESSAGE_FOR_USER_NOT_FOUND)
         return value
@@ -134,7 +139,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         context = self.context.get('view').kwargs
         title = context['title_id']
         if Review.objects.filter(author=author, title=title).exists():
-            raise serializers.ValidationError("Only one review per title for author")
+            raise serializers.ValidationError(
+                "Only one review per title for author"
+            )
         return Review.objects.create(**validated_data)
 
     class Meta:
