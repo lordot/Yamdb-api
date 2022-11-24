@@ -33,11 +33,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+<<<<<<< HEAD
 
     'rest_framework',
     'django_filters',
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig'
+=======
+>>>>>>> dda59284130075d8594381313b4211a9a19e0791
 ]
 
 MIDDLEWARE = [
@@ -118,6 +121,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
+<<<<<<< HEAD
 
 # User
 AUTH_USER_MODEL = 'reviews.User'
@@ -142,3 +146,5 @@ SIMPLE_JWT = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+=======
+>>>>>>> dda59284130075d8594381313b4211a9a19e0791
