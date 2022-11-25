@@ -5,6 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import Category, Comment, Genre, Review, Title, User
 
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'slug')
     search_fields = ('name', 'slug')
@@ -12,6 +13,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ('name', 'slug')
 
 
+@admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'slug')
     search_fields = ('name', 'slug')
@@ -19,6 +21,7 @@ class GenreAdmin(admin.ModelAdmin):
     list_editable = ('name', 'slug')
 
 
+@admin.register(Title)
 class TitlesAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'year', 'category')
     search_fields = ('name', 'category')
@@ -26,6 +29,7 @@ class TitlesAdmin(admin.ModelAdmin):
     list_editable = ('name', 'category')
 
 
+@admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('pk', 'title', 'text', 'author', 'score', 'pub_date')
     search_fields = ('text',)
@@ -33,6 +37,7 @@ class ReviewAdmin(admin.ModelAdmin):
     list_editable = ('text', 'author', 'score')
 
 
+@admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('pk', 'review', 'author', 'text', 'pub_date')
     search_fields = ('text',)
@@ -63,10 +68,3 @@ class CustomAdmin(UserAdmin):
         'bio',
         'role',
     ]
-
-
-admin.site.register(Category, CategoryAdmin)
-admin.site.register(Genre, GenreAdmin)
-admin.site.register(Title, TitlesAdmin)
-admin.site.register(Comment, CommentAdmin)
-admin.site.register(Review, ReviewAdmin)
