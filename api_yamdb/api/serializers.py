@@ -1,6 +1,5 @@
 from django.conf import settings
 import datetime as dt
-from django.db.models import Avg
 from rest_framework import exceptions, serializers
 from rest_framework.validators import UniqueValidator
 

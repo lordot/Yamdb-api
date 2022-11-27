@@ -169,7 +169,6 @@ class SignupViewSet(mixins.CreateModelMixin,
 
 
 class TokenJWTView(APIView):
-
     """Выдача токена"""
     permission_classes = [permissions.AllowAny, ]
 
