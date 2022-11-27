@@ -81,6 +81,8 @@ class TokenSerializer(serializers.Serializer):
 
     def validate(self, data):
         user = get_object_or_404(User, username=data['username'])
-        if not default_token_generator.check_token(user, data['confirmation_code']):
+        if not default_token_generator.check_token(
+                user, data['confirmation_code']
+        ):
             raise exceptions.ParseError
         return data
