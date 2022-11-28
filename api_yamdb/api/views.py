@@ -34,7 +34,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
-    ).select_related('category')
+    ).prefetch_related('category', 'genre')
     permission_classes = [IsAdminOrReadOnly, ]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -69,7 +69,7 @@ class CommentViewSet(ReviewViewSet):
 
     def get_review(self):
         return get_object_or_404(
-            Review, title=self.get_title(), pk=self.kwargs.get("review_id")
+            Review, title=self.get_title(), pk=self.kwargs.get('review_id')
         )
 
     def get_queryset(self):
