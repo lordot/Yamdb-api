@@ -65,23 +65,18 @@ class SignupViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')
         email = serializer.validated_data.get('email')
-        try:
-            user = User.objects.get(
-                username=username,
-                email=email
-            )
-        except User.DoesNotExist:
-            if User.objects.filter(username=username).exists():
-                return Response(
+        if User.objects.filter(username=username).exists():
+            return Response(
                     'Пользователь с таким "username" уже зарегистрирован',
                     status=status.HTTP_400_BAD_REQUEST
-                )
-            if User.objects.filter(email=email).exists():
-                return Response(
+            )
+        if User.objects.filter(email=email).exists():
+            return Response(
                     'Пользователь с таким "email" уже зарегистрирован',
                     status=status.HTTP_400_BAD_REQUEST
-                )
-            user = User.objects.create_user(username=username, email=email)
+            )
+
+        user = User.objects.create_user(username=username, email=email)
         if serializer.is_valid(raise_exception=True):
             user.save()
             confirmation_code = default_token_generator.make_token(user)
