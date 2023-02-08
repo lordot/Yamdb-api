@@ -1,30 +1,29 @@
-
 # YaMDb API
 
-Проект YaMDb API это бэкенд сервис для сбора и публикации отзывов и комментариев пользоваталей на музыкальные произведения, книги и фильмы. Данный API можно использовать совмество с фронтенд для полноценного рейтингового сервиса.
+The YaMDb API project is a backend service for collecting and publishing user reviews and comments on music, books and films. This API can be used in conjunction with the frontend for a full-fledged rating service.
 
 
-## Installation
+##Installation
 
-При первом запуске для функционирования проекта обязательно установить виртуальное окружение и выполнить миграции:
+At the first start, for the project to function, it is necessary to install a virtual environment and perform migrations:
 
-    $ python -m venv env
-    $ source venv/Scripts/activate
-    $ pip install -r requirements.txt
+     $ python -m venv env
+     $ source venv/Scripts/activate
+     $ pip install -r requirements.txt
 
     
-    $ python api_yamdb/manage.py makemigrations
-    $ python api_yamdb/manage.py migrate
-    $ python api_yamdb/manage.py runserver
+     $ python api_yamdb/manage.py makemigrations
+     $ python api_yamdb/manage.py migrate
+     $ python api_yamdb/manage.py runserver
 
-После запуска проекта ознакомиться с документацией можно по ссылке http://127.0.0.1:8000/redoc/
+After starting the project, you can read the documentation at http://127.0.0.1:8000/redoc/
     
-## Authors
+##Authors
 
 - [@sailormoon2111](https://github.com/sailormoon2111)
 
-    Управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля.
+     User management (Auth and Users): registration and authentication system, access rights, working with a token, e-mail confirmation system, fields.
 
 - [@lordot](https://github.com/lordot)
 
-    Категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них и рейтинги. Отзывы (Review) и комментарии (Comments): модели и view, эндпойнты, права доступа для запросов. Рейтинги произведений. Роль тимлида.
+     Categories (Categories), genres (Genres) and works (Titles): models, views and endpoints for them and ratings. Reviews (Review) and comments (Comments): models and views, endpoints, permissions for requests. Product ratings. The role of the team leader.
