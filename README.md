@@ -3,7 +3,7 @@
 The YaMDb API project is a backend service for collecting and publishing user reviews and comments on music, books and films. This API can be used in conjunction with the frontend for a full-fledged rating service.
 
 
-##Installation
+## Installation
 
 At the first start, for the project to function, it is necessary to install a virtual environment and perform migrations:
 
@@ -18,7 +18,7 @@ At the first start, for the project to function, it is necessary to install a vi
 
 After starting the project, you can read the documentation at http://127.0.0.1:8000/redoc/
     
-##Authors
+## Authors
 
 - [@sailormoon2111](https://github.com/sailormoon2111)
 
