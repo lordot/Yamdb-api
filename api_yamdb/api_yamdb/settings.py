@@ -1,10 +1,8 @@
 from datetime import timedelta
 import os
-from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
 
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 RESERVED_NAME = 'me'
 MESSAGE_FOR_RESERVED_NAME = 'Имя пользователя "me" использовать нельзя!'
@@ -78,8 +76,12 @@ WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
 
